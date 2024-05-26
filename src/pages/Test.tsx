@@ -25,14 +25,15 @@ import {
   IonButtons,
   IonFooter,
   IonInput,
+  IonModal,
   InputCustomEvent,
-  InputChangeEventDetail} from '@ionic/react';
-import { heart, trash, caretUp, caretDown, add, personCircle, helpCircle } from 'ionicons/icons';
-import React, { Component, FormEvent } from "react";
-import 'hammerjs';
+  InputChangeEventDetail,
+  IonReorderGroup,
+  IonReorder,
+  IonRange,} from '@ionic/react';
+import { trash, caretUp, caretDown, add, close, arrowBack, arrowBackOutline, trashOutline } from 'ionicons/icons';
+import { Component } from "react";
 import { useLongPress } from 'react-use';
-//import './Test.css';
-
 
 
 function Counter({ idx, counter, methods }: {
@@ -40,102 +41,181 @@ function Counter({ idx, counter, methods }: {
   counter: {
     title: string;
     content: number;
-    pas: number;
+    pitch: number;
+    isModalOpened: boolean,
   };
   methods: {
-    add: (idx: number) => void;
-    sub: (idx: number) => void;
-    handleInputChange: (event: IonInputCustomEvent<InputChangeEventDetail>) => (idx: number) => void;
+    add: (idx: number, minus?: boolean, value?: any) => void;
+    toogleModal: (idx: number) => void;
+    deleteCounter: (idx: number) => void;
+    changePitch: (idx: number, value: any) => void;
+    handleInputChange: (idx: number, event: any) => void;
     };
   }
 ) {
-
+  const toogleModal = () => {
+    isOpenModal = !isOpenModal;
+  }
   const longPressHandler = () => {
-    console.log('calls callback after long pressing 300ms');
+    console.log('calls callback after long pressing 2s');
+    methods.toogleModal(idx)
   };
   const defaultOptions = {
     isPreventDefault: true,
-    delay: 3000,
+    delay: 2000,
   };
-  const longPressEvent = useLongPress(() => { console.log('calls callback after long pressing 3s'); }, defaultOptions);
+  const longPressEvent = useLongPress(longPressHandler, defaultOptions);
 
+  let isOpenModal: boolean = false
   return (
-    <>
+      <>
       <IonCard className="ion-padding" {...longPressEvent}>
+      <IonHeader>
+        <IonCardTitle>
+          <IonInput value={counter.title} arial-label="text-input" onIonChange={({ event }) => methods.handleInputChange(idx, event)}></IonInput>
+        </IonCardTitle>
+      </IonHeader>
+      <IonCardContent>
+        <IonGrid>
+          <IonRow>
+            <IonCol class="ion-text-center" size="10">
+              <div className="counter-value">{counter.content}</div>
+            </IonCol>
+            <IonCol size="1">
+              <IonRow className="ion-align-items-center">
+                <IonButton onClick={() => { methods.add(idx) }} color="secondary" shape="round" fill="solid">
+                  <IonIcon slot="icon-only" icon={caretUp} />
+                </IonButton>
+              </IonRow>
+              <IonRow className="ion-align-items-center">
+                <IonButton onClick={() => { methods.add(idx, true) }} color="secondary" shape="round" fill="solid">
+                  <IonIcon slot="icon-only" icon={caretDown} />
+                </IonButton>
+              </IonRow>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
+      </IonCardContent>
+    </IonCard><IonModal isOpen={counter.isModalOpened}>
         <IonHeader>
-          <IonCardTitle>
-            <IonInput value={counter.title} arial-label="text-input" onIonChange={({ event }) => methods.handleInputChange(idx, event)}></IonInput>
-          </IonCardTitle>
+          <IonToolbar>
+            <IonTitle>Manage</IonTitle>
+            <IonButton onClick={() => methods.toogleModal(idx)} slot="start" shape="round">
+              <IonIcon icon={arrowBackOutline} slot="icon-only"></IonIcon>
+            </IonButton>
+          </IonToolbar>
         </IonHeader>
-        <IonCardContent>
-          <IonGrid>
-            <IonRow>
-              <IonCol class="ion-text-center" size="10">
-                <IonLabel color="secondary">{counter.content}</IonLabel>
-              </IonCol>
-              <IonCol size="1">
-                <IonRow>
-                  <IonButton onClick={() => { methods.add(idx); } } color="secondary" shape="round" fill="solid">
-                    <IonIcon slot="icon-only" icon={caretUp} />
-                  </IonButton>
-                </IonRow>
-                <IonRow>
-                  <IonButton onClick={() => { methods.sub(idx); } } color="secondary" shape="round" fill="solid">
-                    <IonIcon slot="icon-only" icon={caretDown} />
-                  </IonButton>
-                </IonRow>
-              </IonCol>
-            </IonRow>
-          </IonGrid>
-        </IonCardContent>
-      </IonCard></>
+        <IonContent>
+          <IonList>
+            <IonItem>
+              <div className="range-container">
+                <IonLabel><h1>Modify counter's value</h1></IonLabel>
+                <IonRange
+                  aria-label="Range with pin"
+                  pin={true}
+                  pinFormatter={(value: number) => (value >= 0 ? `+${value}` : value)}
+                  min={-50}
+                  max={50}
+                  value={0}
+                  onIonChange={({ detail }) => (methods.add(idx, false, detail.value))}>
+                </IonRange>
+              </div>
+            </IonItem>
+            <IonItem>
+              <div className="flex-container">
+                <IonLabel><h1>Change counter pitch</h1></IonLabel>
+                <IonRange
+                  aria-label="Range with pin"
+                  pin={true}
+                  pinFormatter={(value: number) => (value !== 0 ? `+${value}` : value)}
+                  min={1}
+                  max={10}
+                  value={counter.pitch}
+                  onIonChange={({ detail }) => (methods.changePitch(idx, detail.value))}>
+                </IonRange>
+              </div>
+            </IonItem>
+            <div className="flex-container">
+              <IonButton color="danger" onClick={() => methods.deleteCounter(idx)}>
+                <IonIcon icon={trashOutline}></IonIcon>
+                Delete
+              </IonButton>
+            </div>
+          </IonList>
+        </IonContent>
+      </IonModal></>
   );
 }
 
 class App extends Component {
   state = {  
     counters : [
-          {
+            {
               title: "Pompes du mois",
               content: 110,
-              pas: 10,
+              pitch: 10,
+              isModalOpened: false,
             },
             {
               title: "Grains de riz",
               content: 1,
-              pas: 1,
+              pitch: 1,
+              isModalOpened: false,
             } 
           ],
           newCountersCounter : 0
         }
         listRef : any;
         
-  add = (idx: number) => {
+  add = (idx: number, minus: boolean=false, value?: any): void => {
     let newCounters = [...this.state.counters];
-    newCounters[idx].content += this.state.counters[idx].pas; 
+    
+    if (minus) {
+      newCounters[idx].content -= this.state.counters[idx].pitch; 
+    } else {
+      newCounters[idx].content += value ?? this.state.counters[idx].pitch; 
+    }
     this.setState({
       counters: newCounters
     })
   }
-  sub = (idx: number) => {
+  changePitch = (idx: number, value: any) => {
     let newCounters = [... this.state.counters];
-    newCounters[idx].content -= this.state.counters[idx].pas; 
+    newCounters[idx].pitch = value;
     this.setState({
       counters: newCounters
-    })
+    })  
   }
   addCounter = () => {
-    console.log("adding a new counter...")
     this.state.newCountersCounter += 1;
     let newCountersList = [... this.state.counters];
     newCountersList.push({
       title: `Nouveau compteur ${this.state.newCountersCounter}`,
       content: 0,
-      pas: 1,
+      pitch: 1,
+      isModalOpened: false,
     });
 
     this.setState({
       counters: newCountersList
+    });
+  }
+  deleteCounter = (idx: number) => {
+    let newCountersList = [... this.state.counters];
+    newCountersList.splice(idx, 1)
+    this.setState({
+      counters: newCountersList
+    });
+
+    if (this.state.counters[idx].title.startsWith("Nouveau compteur")) {
+      this.state.newCountersCounter -= 1;
+    }
+  }
+  toogleModal = (idx: number) => {
+    let newCounters = [... this.state.counters];
+    newCounters[idx].isModalOpened = ! this.state.counters[idx].isModalOpened
+    this.setState({
+      counters: newCounters
     });
   }
   handleInputChange = (idx: number, event: InputCustomEvent<InputChangeEventDetail>) => {
@@ -145,7 +225,12 @@ class App extends Component {
     this.setState({
       counters: newCounters
     });
-  };
+  }
+  reorderCardHandler = (event: any) => {
+    const itemMove = this.state.counters.splice(event.detail.from, 1)[0];
+    this.state.counters.splice(event.detail.to, 0, itemMove);
+    event.detail.complete()
+  }
   
 
   render() {  
@@ -157,20 +242,28 @@ class App extends Component {
             </IonToolbar>
           </IonHeader>
           <IonContent ref={me => (this.listRef = me)}>
+            <IonList>
+            <IonReorderGroup disabled={false} onIonItemReorder={this.reorderCardHandler}> 
               {this.state.counters.map((counterItem, idx) => {
                 return (
+                  <IonItem key={idx}>
                   <Counter
                     counter={counterItem}
                     idx={idx}
                     methods={{
-                      add: () => this.add(idx),
-                      sub: () => this.sub(idx),
-                      handleInputChange: () => this.handleInputChange(idx, event)
-                    }}
-                  />
+                      add: this.add,
+                      toogleModal: this.toogleModal,
+                      deleteCounter: this.deleteCounter,
+                      changePitch: this.changePitch,
+                      handleInputChange: this.handleInputChange
+                    }} />
+                  <IonReorder slot="end"></IonReorder>
+                  </IonItem>
                 );
-                })
-              }
+              })
+            }
+            </IonReorderGroup>
+            </IonList>
             <IonFab vertical="bottom" horizontal="center" slot="fixed">
               <IonFabButton onClick={() => this.addCounter()}>
                 <IonIcon icon={add} />
@@ -183,7 +276,3 @@ class App extends Component {
 };
 
 export default App;
-
-function str(value: string | null | undefined): string {
-  throw new Error('Function not implemented.');
-}

@@ -1,0 +1,14 @@
+@import "@ionic/react/css/core.css";
+@import "@ionic/react/css/normalize.css";
+@import "@ionic/react/css/structure.css";
+@import "@ionic/react/css/typography.css";
+@import '@ionic/react/css/display.css';
+
+
+
+@import "./theme/fonts.scss";
+
+ion-label {
+    font-family: Orbitron;
+    font-size: 20px;
+}

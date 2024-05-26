@@ -1,7 +1,17 @@
 /* For information on how to create your own theme, please see:
 http://ionicframework.com/docs/theming/ */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
-ion-label {
-    font-size: 70px ;
-    font-family: "Orbitron", sans-serif;
-  }
+
+.counter-value {
+    font-size: 70px;
+    font-family: Orbitron;
+    color: #0163aa;
+}
+.flex-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}  
+.range-label {
+    margin-bottom: -20px; 
+    font-size: 16px;
+}
