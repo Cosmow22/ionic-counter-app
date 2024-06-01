@@ -4,7 +4,7 @@ http://ionicframework.com/docs/theming/ */
 .counter-value {
     font-size: 70px;
     font-family: Orbitron;
-    color: #0163aa;
+    color: #0163aa; /* same as the default button color */
 }
 .flex-container {
     display: flex;

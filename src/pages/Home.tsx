@@ -25,19 +25,21 @@ import {
   InputChangeEventDetail,
   IonReorderGroup,
   IonReorder,
-  IonRange,} from '@ionic/react';
+  IonRange,
+} from '@ionic/react';
 import {caretUp, caretDown, add, arrowBackOutline, trashOutline } from 'ionicons/icons';
-import { Component } from "react";
+import { Component, RefObject } from "react";
 import { useLongPress } from 'react-use';
 
 
 function Counter({ idx, counter, methods }: {
   idx: number;
+  iRef: any;
   counter: {
     title: string;
     content: number;
     pitch: number;
-    isModalOpened: boolean,
+    isModalOpened: boolean
   };
   methods: {
     add: (idx: number, minus?: boolean, value?: any) => void;
@@ -45,7 +47,6 @@ function Counter({ idx, counter, methods }: {
     deleteCounter: (idx: number) => void;
     changePitch: (idx: number, value: any) => void;
     handleInputChange: (idx: number, event: any) => void;
-    saveCountersInBrowser: () => void
     };
   }
 ) {
@@ -53,7 +54,6 @@ function Counter({ idx, counter, methods }: {
   const longPressHandler = () => {
     console.log('calls callback after long pressing 2s');
     methods.toogleModal(idx)
-    methods.saveCountersInBrowser()
   };
   const defaultOptions = {
     isPreventDefault: true,
@@ -66,7 +66,11 @@ function Counter({ idx, counter, methods }: {
       <IonCard className="ion-padding" {...longPressEvent}>
       <IonHeader>
         <IonCardTitle>
-          <IonInput value={counter.title} arial-label="text-input" onIonChange={({ event }) => methods.handleInputChange(idx, event)}></IonInput>
+          <IonInput
+            value={counter.title}
+            arial-label="text-input" 
+            onIonChange={event => methods.handleInputChange(idx, event)}
+          />
         </IonCardTitle>
       </IonHeader>
       <IonCardContent>
@@ -142,7 +146,7 @@ function Counter({ idx, counter, methods }: {
   );
 }
 
-class App extends Component {
+class Home extends Component {
   state = {  
     counters : [
             {
@@ -161,11 +165,18 @@ class App extends Component {
           newCountersCounter : 0
         }
         
+  componentDidMount = () => {
+    const storedState = localStorage.getItem("state");
+    if (storedState) {
+      this.setState(JSON.parse(storedState));
+      }
+    this.saveCountersInBrowser()
+  }
         
   saveCountersInBrowser = () => {
     localStorage.setItem("state", JSON.stringify(this.state));
   }
-
+  
   add = (idx: number, minus: boolean=false, value?: any): void => {
     let newCounters = [...this.state.counters];
     
@@ -177,18 +188,16 @@ class App extends Component {
     this.setState({
       counters: newCounters
     })
-    this.saveCountersInBrowser()
   }
-
+  
   changePitch = (idx: number, value: any) => {
     let newCounters = [... this.state.counters];
     newCounters[idx].pitch = value;
     this.setState({
       counters: newCounters
-    })
-    this.saveCountersInBrowser()  
+    })  
   }
-
+  
   addCounter = () => {
     this.state.newCountersCounter += 1;
     let newCountersList = [... this.state.counters];
@@ -201,7 +210,6 @@ class App extends Component {
     this.setState({
       counters: newCountersList
     });
-    this.saveCountersInBrowser()
   }
   
   deleteCounter = (idx: number) => {
@@ -213,7 +221,6 @@ class App extends Component {
     if (this.state.counters[idx].title.startsWith("Nouveau compteur")) {
       this.state.newCountersCounter -= 1;
     }
-    this.saveCountersInBrowser()
   }
   
   toogleModal = (idx: number) => {
@@ -223,15 +230,15 @@ class App extends Component {
       counters: newCounters
     });
   }
-  
-  handleInputChange = (idx: number, event: InputCustomEvent<InputChangeEventDetail>) => {
-    console.log(`input changes on idx: ${idx} at counter: ${event.detail.value}`)
+
+  inputRef: any;
+  handleInputChange = (idx: number, event: any) => {
+    console.log(`input changes on idx: ${idx} at counter: ${event}`)
     let newCounters = [... this.state.counters];
-    newCounters[idx].title = event.detail.value;
+    newCounters[idx].title = event.detail.value ////this.inputRef.getInputElement();
     this.setState({
       counters: newCounters
     });
-    this.saveCountersInBrowser()
   }
   
   reorderCardHandler = (event: any) => {
@@ -258,13 +265,13 @@ class App extends Component {
                   <Counter
                     counter={counterItem}
                     idx={idx}
+                    iRef={this.inputRef}
                     methods={{
                       add: this.add,
                       toogleModal: this.toogleModal,
                       deleteCounter: this.deleteCounter,
                       changePitch: this.changePitch,
                       handleInputChange: this.handleInputChange,
-                      saveCountersInBrowser: this.saveCountersInBrowser
                     }} />
                   <IonReorder slot="end"></IonReorder>
                   </IonItem>
@@ -284,4 +291,4 @@ class App extends Component {
     };
 };
 
-export default App;
+export default Home;
