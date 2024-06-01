@@ -8,7 +8,7 @@ import {
 } from '@ionic/react';
 import { add } from 'ionicons/icons';
 import React, { Component } from "react";
-import { Counter } from './Test';
+import { Counter } from './Home';
 
 export class App extends Component {
   state = {
