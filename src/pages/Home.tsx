@@ -3,7 +3,6 @@ import {
   IonCard, 
   IonCardContent, 
   IonCardTitle, 
-  IonCheckbox, 
   IonCol, 
   IonContent,
   IonHeader, 
@@ -16,20 +15,17 @@ import {
   IonTitle, 
   IonToolbar,
   IonGrid, 
-  IonText,
   IonFab,
   IonFabButton,
   IonInput,
   IonModal,
-  InputCustomEvent,
-  InputChangeEventDetail,
   IonReorderGroup,
   IonReorder,
   IonRange,
-  useIonViewDidLeave,
+  withIonLifeCycle ,
 } from '@ionic/react';
 import {caretUp, caretDown, add, arrowBackOutline, trashOutline } from 'ionicons/icons';
-import { Component, RefObject } from "react";
+import { Component } from "react";
 import { useLongPress } from 'react-use';
 
 
@@ -52,7 +48,7 @@ function CounterWiget({ idx, counter, methods }: {
 ) {
 
   const longPressHandler = () => {
-    console.log('calls callback after long pressing 2s');
+    console.log('calls back after long press of 2s');
     methods.toogleModal(idx)
   };
   const defaultOptions = {
@@ -163,10 +159,21 @@ class Home extends Component {
             } 
           ],
     newCountersCounter : 0,
-    //storedState: false as unknown as string | null
     }
         
-      
+  ionViewWillEnter() {
+    let savedCounters = localStorage.getItem("counters");
+    console.log(savedCounters)
+    if (savedCounters) {
+      savedCounters = JSON.parse(savedCounters)
+      this.setState( {counters : savedCounters} )
+    }
+  }
+
+  saveStateChanges = () => {
+    localStorage.setItem("counters", JSON.stringify(this.state.counters))
+  }
+    
   add = (idx: number, minus: boolean=false, value?: any): void => {
     let newCounters = [...this.state.counters];
     
@@ -179,6 +186,7 @@ class Home extends Component {
       counters: newCounters
     })
     console.log(`${this.state.counters[idx]} vaut ${this.state.counters[idx].content} dans la classe`)
+    this.saveStateChanges()
   }
   
   changePitch = (idx: number, value: any) => {
@@ -186,7 +194,8 @@ class Home extends Component {
     newCounters[idx].pitch = value;
     this.setState({
       counters: newCounters
-    })  
+    })
+    this.saveStateChanges()  
   }
   
   addCounter = () => {
@@ -212,6 +221,7 @@ class Home extends Component {
     if (this.state.counters[idx].title.startsWith("Nouveau compteur")) {
       this.state.newCountersCounter -= 1;
     }
+    this.saveStateChanges()
   }
   
   toogleModal = (idx: number) => {
@@ -220,6 +230,7 @@ class Home extends Component {
     this.setState({
       counters: newCounters
     });
+    this.saveStateChanges()
   }
 
   handleInputChange = (idx: number, event: any) => {
@@ -229,12 +240,14 @@ class Home extends Component {
     this.setState({
       counters: newCounters
     });
+    this.saveStateChanges()
   }
   
   reorderCardHandler = (event: any) => {
     const itemMove = this.state.counters.splice(event.detail.from, 1)[0];
     this.state.counters.splice(event.detail.to, 0, itemMove);
     event.detail.complete()
+    this.saveStateChanges()
   }
   
 
@@ -280,4 +293,4 @@ class Home extends Component {
     };
 };
 
-export default Home;
+export default withIonLifeCycle(Home);
