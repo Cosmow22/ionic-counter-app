@@ -26,13 +26,14 @@ import {
   IonReorderGroup,
   IonReorder,
   IonRange,
+  useIonViewDidLeave,
 } from '@ionic/react';
 import {caretUp, caretDown, add, arrowBackOutline, trashOutline } from 'ionicons/icons';
 import { Component, RefObject } from "react";
 import { useLongPress } from 'react-use';
 
 
-function Counter({ idx, counter, methods }: {
+function CounterWiget({ idx, counter, methods }: {
   idx: number;
   iRef: any;
   counter: {
@@ -162,21 +163,11 @@ class Home extends Component {
               isModalOpened: false,
             } 
           ],
-          newCountersCounter : 0
-        }
+    newCountersCounter : 0,
+    //storedState: false as unknown as string | null
+    }
         
-  componentDidMount = () => {
-    const storedState = localStorage.getItem("state");
-    if (storedState) {
-      this.setState(JSON.parse(storedState));
-      }
-    this.saveCountersInBrowser()
-  }
-        
-  saveCountersInBrowser = () => {
-    localStorage.setItem("state", JSON.stringify(this.state));
-  }
-  
+      
   add = (idx: number, minus: boolean=false, value?: any): void => {
     let newCounters = [...this.state.counters];
     
@@ -188,6 +179,7 @@ class Home extends Component {
     this.setState({
       counters: newCounters
     })
+    console.log(`${this.state.counters[idx]} vaut ${this.state.counters[idx].content} dans la classe`)
   }
   
   changePitch = (idx: number, value: any) => {
@@ -262,7 +254,7 @@ class Home extends Component {
               {this.state.counters.map((counterItem, idx) => {
                 return (
                   <IonItem key={idx}>
-                  <Counter
+                  <CounterWiget
                     counter={counterItem}
                     idx={idx}
                     iRef={this.inputRef}
@@ -285,6 +277,7 @@ class Home extends Component {
                 <IonIcon icon={add} />
               </IonFabButton>
             </IonFab>
+            <IonLabel>Les carottes sont cuites</IonLabel>
           </IonContent>
           </IonPage>
         );
