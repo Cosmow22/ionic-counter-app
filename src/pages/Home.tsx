@@ -35,7 +35,6 @@ import { useLongPress } from 'react-use';
 
 function CounterWiget({ idx, counter, methods }: {
   idx: number;
-  iRef: any;
   counter: {
     title: string;
     content: number;
@@ -223,11 +222,10 @@ class Home extends Component {
     });
   }
 
-  inputRef: any;
   handleInputChange = (idx: number, event: any) => {
     console.log(`input changes on idx: ${idx} at counter: ${event}`)
     let newCounters = [... this.state.counters];
-    newCounters[idx].title = event.detail.value ////this.inputRef.getInputElement();
+    newCounters[idx].title = event.detail.value
     this.setState({
       counters: newCounters
     });
@@ -257,7 +255,6 @@ class Home extends Component {
                   <CounterWiget
                     counter={counterItem}
                     idx={idx}
-                    iRef={this.inputRef}
                     methods={{
                       add: this.add,
                       toogleModal: this.toogleModal,
@@ -277,7 +274,6 @@ class Home extends Component {
                 <IonIcon icon={add} />
               </IonFabButton>
             </IonFab>
-            <IonLabel>Les carottes sont cuites</IonLabel>
           </IonContent>
           </IonPage>
         );
