@@ -210,6 +210,7 @@ class Home extends Component {
     this.setState({
       counters: newCountersList
     });
+    this.saveStateChanges()
   }
   
   deleteCounter = (idx: number) => {
