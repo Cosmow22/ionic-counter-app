@@ -111,7 +111,6 @@ function CounterWiget({ idx, counter, methods }: {
                   pinFormatter={(value: number) => (value >= 0 ? `+${value}` : value)}
                   min={-50}
                   max={50}
-                  value={0}
                   onIonChange={({ detail }) => (methods.add(idx, false, detail.value))}>
                 </IonRange>
               </div>
@@ -162,16 +161,16 @@ class Home extends Component {
     }
         
   ionViewWillEnter() {
-    let savedCounters = localStorage.getItem("counters");
-    console.log(savedCounters)
-    if (savedCounters) {
-      savedCounters = JSON.parse(savedCounters)
-      this.setState( {counters : savedCounters} )
+    let savedState = localStorage.getItem("state");
+    if (savedState) {
+      savedState = JSON.parse(savedState)
+      this.setState(savedState)
     }
   }
 
   saveStateChanges = () => {
-    localStorage.setItem("counters", JSON.stringify(this.state.counters))
+    console.log("saving counters...");
+    localStorage.setItem("state", JSON.stringify(this.state));
   }
     
   add = (idx: number, minus: boolean=false, value?: any): void => {
@@ -185,7 +184,6 @@ class Home extends Component {
     this.setState({
       counters: newCounters
     })
-    console.log(`${this.state.counters[idx]} vaut ${this.state.counters[idx].content} dans la classe`)
     this.saveStateChanges()
   }
   
@@ -199,28 +197,36 @@ class Home extends Component {
   }
   
   addCounter = () => {
-    this.state.newCountersCounter += 1;
+    let updatedNewCountersCounter = this.state.newCountersCounter + 1
     let newCountersList = [... this.state.counters];
     newCountersList.push({
-      title: `Nouveau compteur ${this.state.newCountersCounter}`,
+      title: `Nouveau compteur ${updatedNewCountersCounter}`,
       content: 0,
       pitch: 1,
       isModalOpened: false,
     });
-    this.setState({
-      counters: newCountersList
-    });
+    this.setState(
+      { counters : newCountersList,
+        newCountersCounter : updatedNewCountersCounter,
+       }
+    )
     this.saveStateChanges()
+
   }
   
   deleteCounter = (idx: number) => {
     let newCountersList = [... this.state.counters];
-    newCountersList.splice(idx, 1)
+    newCountersList.splice(idx, 1);
     this.setState({
       counters: newCountersList
     });
-    if (this.state.counters[idx].title.startsWith("Nouveau compteur")) {
-      this.state.newCountersCounter -= 1;
+    let isDefaultTitle = this.state.counters[idx].title.startsWith("Nouveau compteur");
+    let isLastDefaultTitle = parseInt(this.state.counters[idx].title.slice(-1)) === this.state.newCountersCounter;
+    if (isDefaultTitle && isLastDefaultTitle) {
+      console.log("if statement triggered")
+      this.setState({
+        newCountersCounter: this.state.newCountersCounter -= 1
+      });
     }
     this.saveStateChanges()
   }
@@ -237,6 +243,9 @@ class Home extends Component {
   handleInputChange = (idx: number, event: any) => {
     console.log(`input changes on idx: ${idx} at counter: ${event}`)
     let newCounters = [... this.state.counters];
+    if (newCounters[idx].title.startsWith("Nouveau compteur")) {
+      this.state.newCountersCounter -= 1
+    }
     newCounters[idx].title = event.detail.value
     this.setState({
       counters: newCounters
